@@ -33,12 +33,12 @@ public class EventController {
     private TagRepository tagRepository;
 
     @GetMapping
-    public String displayEvents(@RequestParam(required = false) Integer categoryId, Model model) {
+    public String displayEvents(@RequestParam(required = false) Integer categoryId, @RequestParam(required = false) Integer tagId, Model model) {
 
-        if (categoryId == null) {
+        if (categoryId == null || tagId == null) {
             model.addAttribute("title", "All Events");
             model.addAttribute("events", eventRepository.findAll());
-        } else {
+        } else if (categoryId != null){
             Optional<EventCategory> result = eventCategoryRepository.findById(categoryId);
             if (result.isEmpty()) {
                 model.addAttribute("title", "Invalid Category ID: " + categoryId);
@@ -46,6 +46,15 @@ public class EventController {
                 EventCategory category = result.get();
                 model.addAttribute("title", "Events in category: " + category.getName());
                 model.addAttribute("events", category.getEvents());
+            }
+        } else if (tagId != null){
+            Optional<Tag> optTag = tagRepository.findById(tagId);
+            if(optTag.isEmpty()) {
+                model.addAttribute("title", "Invalid Tag Id: " + tagId);
+            } else {
+                Tag tag = optTag.get();
+                model.addAttribute("title", "Events with Tag: " + tag.getName());
+                model.addAttribute("tags", tag.getEvents());
             }
         }
 
@@ -138,5 +147,7 @@ public class EventController {
 
         return "redirect:add-tag";
     }
+
+
 
 }
